@@ -311,3 +311,111 @@ xtcp_host_t shim_request_host_by_name(unsigned client_num, const uint8_t hostnam
   }
   return result;
 }
+
+static xtcp_error_code_t shim_ip_getsockopt(unsigned client_num, int32_t id, uint32_t option, uint8_t value[], uint32_t *length) {
+  const struct ip_pcb *ip_pcb;
+
+  switch (get_protocol(id)) {
+  case XTCP_PROTOCOL_UDP:
+    ip_pcb = (struct ip_pcb *)get_udp_pcb(id);
+    break;
+  case XTCP_PROTOCOL_TCP:
+    ip_pcb = (struct ip_pcb *)get_tcp_pcb(id);
+    break;
+  default:
+    return XTCP_EINVAL;
+  }
+
+  switch ((xtcp_ip_socket_option_t)option) {
+  case XTCP_IP_SOCKET_OPTION_TOS:
+    if (*length < 1)
+      return XTCP_EINVAL;
+
+    *value = ip_pcb->tos;
+    *length = 1;
+    break;
+  case XTCP_IP_SOCKET_OPTION_TTL:
+    if (*length < 1)
+      return XTCP_EINVAL;
+
+    *value = ip_pcb->ttl;
+    *length = 1;
+    break;
+  default:
+    return XTCP_EINVAL;
+  }
+
+  return XTCP_SUCCESS;
+}
+
+xtcp_error_code_t shim_getsockopt(unsigned client_num, int32_t id, xtcp_socket_level_t level, uint32_t option, uint8_t value[], uint32_t *length) {
+  xtcp_error_int32_t connection = find_client_connection(client_num, id);
+  if (connection.status != XTCP_SUCCESS) {
+    debug_printf("No active client connection found\n");
+    return connection.status;
+  }
+
+  xtcp_error_code_t result;
+
+  switch (level) {
+  case XTCP_SOCKET_LEVEL_IP:
+    result = shim_ip_getsockopt(client_num, id, option, value, length);
+    break;
+  default:
+    result = XTCP_EINVAL;
+    break;
+  }
+
+  return result;
+}
+
+static xtcp_error_code_t shim_ip_setsockopt(unsigned client_num, int32_t id, uint32_t option, const uint8_t value[], uint32_t length) {
+  struct ip_pcb *ip_pcb;
+
+  switch (get_protocol(id)) {
+  case XTCP_PROTOCOL_UDP:
+    ip_pcb = (struct ip_pcb *)get_udp_pcb(id);
+    break;
+  case XTCP_PROTOCOL_TCP:
+    ip_pcb = (struct ip_pcb *)get_tcp_pcb(id);
+    break;
+  default:
+    return XTCP_EINVAL;
+  }
+
+  switch ((xtcp_ip_socket_option_t)option) {
+  case XTCP_IP_SOCKET_OPTION_TOS:
+    if (length < 1)
+      return XTCP_EINVAL;
+
+    ip_pcb->tos = *value;
+    break;
+  case XTCP_IP_SOCKET_OPTION_TTL:
+    if (length < 1)
+      return XTCP_EINVAL;
+
+    ip_pcb->ttl = *value;
+    break;
+  default:
+    return XTCP_EINVAL;
+  }
+
+  return XTCP_SUCCESS;
+}
+
+xtcp_error_code_t shim_setsockopt(unsigned client_num, int32_t id, xtcp_socket_level_t level, uint32_t option, const uint8_t value[], uint32_t length) {
+  xtcp_error_int32_t connection = find_client_connection(client_num, id);
+  if (connection.status != XTCP_SUCCESS) {
+    debug_printf("No active client connection found\n");
+    return connection.status;
+  }
+
+  switch (level) {
+  case XTCP_SOCKET_LEVEL_IP:
+    return shim_ip_setsockopt(client_num, id, option, value, length);
+  default:
+    break;
+  }
+
+  return XTCP_EINVAL;
+}
