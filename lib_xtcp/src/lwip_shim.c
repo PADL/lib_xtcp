@@ -297,6 +297,14 @@ xtcp_error_code_t shim_leave_multicast_group(xtcp_ipaddr_t addr) {
   return result;
 }
 
+int shim_is_igmp_enabled(void) {
+#if LWIP_IGMP
+  return 1;
+#else
+  return 0;
+#endif
+}
+
 xtcp_host_t shim_request_host_by_name(unsigned client_num, const uint8_t hostname[], xtcp_ipaddr_t dns_server) {
   xtcp_host_t result = { .ipaddr = {0}, .port_number = 0 };
 
