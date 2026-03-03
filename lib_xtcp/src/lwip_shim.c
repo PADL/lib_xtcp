@@ -265,6 +265,7 @@ xtcp_error_code_t shim_sendto(unsigned client_num, int32_t id, void* buffer_toke
 
 xtcp_error_code_t shim_join_multicast_group(xtcp_ipaddr_t addr) {
   xtcp_error_code_t result = XTCP_EINVAL;
+#if LWIP_IGMP
   ip_addr_t group_addr;
   memcpy(&group_addr, addr, sizeof(ip_addr_t));
 
@@ -275,11 +276,13 @@ xtcp_error_code_t shim_join_multicast_group(xtcp_ipaddr_t addr) {
   if (err == ERR_OK) {
     result = XTCP_SUCCESS;
   }
+#endif
   return result;
 }
 
 xtcp_error_code_t shim_leave_multicast_group(xtcp_ipaddr_t addr) {
   xtcp_error_code_t result = XTCP_EINVAL;
+#if LWIP_IGMP
   ip_addr_t group_addr;
   memcpy(&group_addr, addr, sizeof(ip_addr_t));
 
@@ -290,6 +293,7 @@ xtcp_error_code_t shim_leave_multicast_group(xtcp_ipaddr_t addr) {
   if (err == ERR_OK) {
     result = XTCP_SUCCESS;
   }
+#endif
   return result;
 }
 
