@@ -1,4 +1,4 @@
-// Copyright 2025 XMOS LIMITED.
+// Copyright 2025-2026 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #ifndef __XK_ETH_XU316_DUAL_100M_BOARD_H__

@@ -1,4 +1,4 @@
-// Copyright 2025 XMOS LIMITED.
+// Copyright 2025-2026 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #include "xk_eth_xu316_dual_100m/board.h"
